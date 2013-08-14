@@ -17,6 +17,9 @@ objective <- function(p,dat) {
   pls <- make.parlists(p)
   no.response <- is.na(dat$R)
   stop.trial <- is.finite(dat$SSD)
+  dl <- levels(dat$D) # e.g., normal vs. deprived
+  sl <- levels(dat$S) # e.g. left vs. right stimulus
+  rl <- levels(dat$R) # e.g. left vs. right response
   for (d in dl) for (s in sl) {
 
     # Go fail probability 
@@ -43,7 +46,6 @@ objective <- function(p,dat) {
         "deprived"=switch(s,"left"=dfun.stop(pls$D2S1s,j),"right"=dfun.stop(pls$D2S2s,j))),
         nstop[as.character(j)])    
     }
-    
     for (r in rl) { # GO(t) and STOP(t)
       
       # Go reponses
@@ -88,28 +90,27 @@ sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5),
   dl=c("normal","deprived"),sl=c("left","right")) {
   parlists <- make.parlists(trans(p))
   nssd = length(ssds)
-  if (length(stopp)==1) stopp <- rep(stopp/nssd,nssd)
+  if (length(stopp)==1) stopp <- rep(stopp,nssd)
   if (nssd !=length(stopp)) stop("stopp and ssds not same length")
   ssdn <- round(sum(stopp)*nsim/nssd)
-  nstop <- nssd*ssdn
-  ngo <- nsim-(nstop)  
+  ngo <- nsim-(nssd*ssdn)  
   dat.go <- cbind.data.frame(
-    D=factor(rep(dl,each=ngo*2)),
-    S=factor(rep(sl,each=ngo,times=2)),
-    SSD=rep(Inf,ngo*4),
+    D=factor(rep(dl,each=nsim*2)),
+    S=factor(rep(sl,each=nsim,times=2)),
+    SSD=rep(Inf,nsim*4),
     rbind(rfun(ngo,parlists$D1S1),
           rfun(ngo,parlists$D1S2),
           rfun(ngo,parlists$D2S1),
           rfun(ngo,parlists$D2S2)
     )
   )
-  names(dat.go)[4:5] <- c("R","RT")
+  names(dat.go)[3:4] <- c("R","RT")
   dat.go$R <- factor(dat.go$R,labels=c("left","right"))
   dat.go$C <- dat.go$R==dat.go$S
   SSD <- rep(ssds,each=ssdn)
   dat.stop <- cbind.data.frame(
-    D=factor(rep(dl,each=nstop*2)),
-    S=factor(rep(sl,each=nstop,times=2)),
+    D=factor(rep(dl,each=nsim*2)),
+    S=factor(rep(sl,each=nsim,times=2)),
     SSD=rep(ssds,each=ssdn,times=4),
     rbind(rfun(nstop,parlists$D1S1,SSD),
           rfun(nstop,parlists$D1S2,SSD),
@@ -117,10 +118,10 @@ sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5),
           rfun(nstop,parlists$D2S2,SSD)
     )
   )
-  names(dat.stop)[4:5] <- c("R","RT")
+  names(dat.stop)[3:4] <- c("R","RT")
   dat.stop$R <- factor(dat.stop$R,labels=c("left","right"))
   dat.stop$C <- dat.stop$R==dat.stop$S 
-  rbind(dat.go,dat.stop)[,c("D","S","SSD","R","C","RT")]
+  rbind(dat.or,dat.and)
 }
 
 
