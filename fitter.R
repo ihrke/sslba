@@ -1,3 +1,4 @@
+require(DEoptim)
 # Parameters to psoptim
 #
 # MG: par   - vector: length defines number of dimensions of the problem
@@ -592,7 +593,8 @@ psoptimcl <- cmpfun (U_psoptimcl)
 fit.one <- function(p,dat,fn,type,control=list()) {
   if (type=="de" & !any(is.na(p))) {
     if (is.null(control$NP)) 
-      NP <- 10*length(lower) else
+      NP <- 10*length(lower) 
+    else
       NP <- control$NP
     control$initialpop <- matrix(ncol=length(lower),nrow=NP)
     if (!is.matrix(p)) {

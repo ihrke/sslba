@@ -44,6 +44,7 @@ objective <- function(p,dat) {
         nstop[as.character(j)])    
     }
     
+    rl=levels(dat$R)
     for (r in rl) { # GO(t) and STOP(t)
       
       # Go reponses
