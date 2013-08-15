@@ -14,7 +14,7 @@
 objective <- function(p,dat) {
   
   L <- numeric(dim(dat)[1])
-  pls <- make.parlists(p)
+  pls <- make.parlists(untrans(p)) # think we have to untrans, since we get p from optimizer (?)
   no.response <- is.na(dat$R)
   stop.trial <- is.finite(dat$SSD)
   for (d in dl) for (s in sl) {
