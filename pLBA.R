@@ -65,7 +65,8 @@ rfun <- function(n,parlist,SSD=NA,stoprt=FALSE) {
   out[,gf] <- NA
   if (!go) {
     tf <- as.logical(rbinom(dim(out)[2],1,parlist$tf))
-    if (!stoprt) out[!tf & winner==1,2] <- NA
+    
+    if (!stoprt) out[2, !tf & winner==1] <- NA
     out[1,] <- out[1,]-1    
   }
   t(out)
