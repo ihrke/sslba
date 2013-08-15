@@ -70,11 +70,11 @@ objective <- function(p,dat) {
         # STOP(t)=(1-pgf)*[ptf + (1-ptf)*Ls(t)]
         L[is.in] <- (1-pgf)*(ptf+(1-ptf)*switch(d,
           "normal"=switch(s,
-            "left" =switch(r,"left"=dfun.1s(t,pls$D1S1s,SSD),"right"=dfun.2s(t,pls$D1S1,SSD)),
-            "right"=switch(r,"left"=dfun.1s(t,pls$D1S2s,SSD),"right"=dfun.2s(t,pls$D1S2,SSD))),
+            "left" =switch(r,"left"=dfun.1s(t,pls$D1S1s,SSD),"right"=dfun.2s(t,pls$D1S1s,SSD)),
+            "right"=switch(r,"left"=dfun.1s(t,pls$D1S2s,SSD),"right"=dfun.2s(t,pls$D1S2s,SSD))),
           "deprived"=switch(s,
-            "left" =switch(r,"left"=dfun.1s(t,pls$D2S1s,SSD),"right"=dfun.2s(t,pls$D2S1,SSD)),
-            "right"=switch(r,"left"=dfun.1s(t,pls$D2S2s,SSD),"right"=dfun.2s(t,pls$D2S2,SSD)))
+            "left" =switch(r,"left"=dfun.1s(t,pls$D2S1s,SSD),"right"=dfun.2s(t,pls$D2S1s,SSD)),
+            "right"=switch(r,"left"=dfun.1s(t,pls$D2S2s,SSD),"right"=dfun.2s(t,pls$D2S2s,SSD)))
         ))
       }
     } # end of response loop      
