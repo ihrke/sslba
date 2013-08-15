@@ -14,4 +14,22 @@ dat=sim.stop(ntrials, pars, stopp=1/3.)
 lower=trans(c(ster=1e-5,ter=1e-5,A=1e-5,Bs=1e-5,B=1e-5,Vs=-5,V=-5,v=-5))
 upper=trans(c(ster=1,   ter=1,   A=5,   Bs=5,   B=5,   Vs=5, V=5, v=5))
 
-fit=fit.one(trans(start), dat, objective, 'simplex',control=list(maxit=500, trace=10))
+# generate random parameters and test objective function within bounds
+randpar <- function( n, lower, upper ){
+    res=list()
+    for( i in 1:n){
+      cur=c()
+      for( j in 1:length(lower)){
+        cur=c(cur,runif(1, min=lower[j], max=upper[j]))
+      }
+      res[[i]]=cur
+    }
+    res
+}
+
+for( par in randpar(100, lower, upper)){
+  print( objective(par, dat))
+}
+
+fit=fit.one(trans(start), dat, objective, 'de',control=list(trace=T))
+#DEoptim(fn=objective, dat=dat, lower=lower, upper=upper)

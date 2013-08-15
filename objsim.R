@@ -12,7 +12,6 @@
 # STOP(t) : (1-pgf)*[ptf + (1-ptf)*Ls(t)]
 
 objective <- function(p,dat) {
-  
   L <- numeric(dim(dat)[1])
   pls <- make.parlists(untrans(p)) # think we have to untrans, since we get p from optimizer (?)
   no.response <- is.na(dat$R)

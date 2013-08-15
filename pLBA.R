@@ -5,6 +5,10 @@ require(truncnorm,quietly=T)
 ############################  Postive LBA NODE FUNCTIONS
 
 # MAKE SURE PNORM DOESNT PRODUCE FUNNY RESULTS
+
+## NOTE(matthias): is it a good idea to set a hard numerical threshold (i.e., 7)?
+##  should maybe depend on mean/sd? E.g. crit=mean+7*sd ?
+
 pnormP  <- function(x,mean=0,sd=1,lower.tail=T){ifelse(abs(x)<7,pnorm(x,mean,sd,lower.tail),ifelse(x<0,0,1))}
 
 dnormP <- function(x,mean=0,sd=1,lower.tail=T){ifelse(abs(x)<7,dnorm(x,mean,sd),0)}
