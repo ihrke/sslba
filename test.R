@@ -5,6 +5,23 @@
 # install.packages("compiler")   # Maybe built in and dont need
 # install.packages("DEoptim")    # 
 
+######################  READ IN REALL DATA
+load("sdat.RData") # produced by Andrew's parser
+names(sdat)[3] <- "D"
+sdat$SSD[!is.finite(sdat$SSD)] <- Inf
+levels(sdat$D) <- c("normal","deprived")
+sdat.seen <- sdat[sdat$SEEN==1,-11]
+sdat.all <- sdat[,-11]
+snams <- levels(sdat$s)
+sdat.all.list <- vector(mode="list",length=length(snams))
+names(sdat.all.list) <- snams
+sdat.seen.list <- sdat.all.list 
+for (i in snams) {
+  sdat.seen.list[[i]] <- sdat.seen[sdat.seen$s==i,c("D","S","SSD","R","C","RT")] 
+  sdat.all.list [[i]] <- sdat.all[sdat.all$s==i,c("D","S","SSD","R","C","RT")]
+}
+save(sdat.seen,sdat.all,sdat.seen.list,sdat.all.list,file="sleep.RData")
+
 #########################  LNR model
 rm(list=ls())
 source("fitter.R")

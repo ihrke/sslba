@@ -5,32 +5,33 @@ require(truncnorm,quietly=T)
 ############################  Postive LBA NODE FUNCTIONS
 
 # MAKE SURE PNORM DOESNT PRODUCE FUNNY RESULTS
-pnormP <- function(x){ifelse(abs(x)<7,pnorm(x),ifelse(x<0,0,1))}
+pnormP  <- function(x,mean=0,sd=1,lower.tail=T){ifelse(abs(x)<7,pnorm(x,mean,sd,lower.tail),ifelse(x<0,0,1))}
 
-dnormP <- function(x){ifelse(abs(x)<7,dnorm(x),0)}
+dnormP <- function(x,mean=0,sd=1,lower.tail=T){ifelse(abs(x)<7,dnorm(x,mean,sd),0)}
 
 # Density for one unit
 p1=function(z,A,b,v,sv) {
   # pdf for a single unit
   if (A<1e-10) # LATER solution 
-    return( ((b/z^2)*dnorm(b/z,mean=v,sd=sv))/pnormP(v/sv) ) # posdrifts
+    return( pmax(0,((b/z^2)*dnormP(b/z,mean=v,sd=sv))/pnormP(v/sv)) ) # posdrifts
   zs=z*sv ; zu=z*v ; bminuszu=b-zu
   bzu=bminuszu/zs ; bzumax=(bminuszu-A)/zs
-  ((v*(pnormP(bzu)-pnormP(bzumax)) +
-      sv*(dnormP(bzumax)-dnormP(bzu)))/A)/pnormP(v/sv) # posdrifts
+  pmax(0,((v*(pnormP(bzu)-pnormP(bzumax)) +
+             sv*(dnormP(bzumax)-dnormP(bzu)))/A)/pnormP(v/sv)) # posdrifts
 }
 
 # Cumulative density for one unit
 c1=function(z,A,b,v,sv) {
   # cdf for a single unit
   if (A<1e-10) # LATER solution 
-    return( (pnorm(b/z,mean=v,sd=sv,lower.tail=F))/pnormP(v/sv) ) # posdrifts
+    return( pmin(1,pmax(0,(pnormP(b/z,mean=v,sd=sv,lower.tail=F))/pnormP(v/sv))) ) # posdrifts
   zs=z*sv ; zu=z*v ; bminuszu=b-zu ; xx=bminuszu-A
   bzu=bminuszu/zs ; bzumax=xx/zs
   tmp1=zs*(dnormP(bzumax)-dnormP(bzu))
   tmp2=xx*pnormP(bzumax)-bminuszu*pnormP(bzu)
-  (1+(tmp1+tmp2)/A)/pnormP(v/sv) # posdrifts
+  pmin(pmax(0,(1+(tmp1+tmp2)/A)/pnormP(v/sv)),1) # posdrifts
 }
+
 
 ############### Positive ssLBA RANDOM FUNCTION
 
