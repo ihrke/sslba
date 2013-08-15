@@ -110,13 +110,14 @@ sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5), dl=c("normal","dep
     D=factor(rep(dl,each=nstop*2)),
     S=factor(rep(sl,each=nstop,times=2)),
     SSD=rep(ssds,each=ssdn,times=4),
-    rbind(rfun(nstop,parlists$D1S1,SSD),
-          rfun(nstop,parlists$D1S2,SSD),
-          rfun(nstop,parlists$D2S1,SSD),
-          rfun(nstop,parlists$D2S2,SSD)
+    rbind(rfun(nstop,parlists$D1S1s,SSD),
+          rfun(nstop,parlists$D1S2s,SSD),
+          rfun(nstop,parlists$D2S1s,SSD),
+          rfun(nstop,parlists$D2S2s,SSD)
     )
   )
   names(dat.stop)[4:5] <- c("R","RT")
+  dat.stop$R[dat.stop$R==0]=NA # winning stop process -> no response
   dat.stop$R <- factor(dat.stop$R,labels=c("left","right"))
   dat.stop$C <- dat.stop$R==dat.stop$S 
   rbind(dat.go,dat.stop)[,c("D","S","SSD","R","C","RT")]
