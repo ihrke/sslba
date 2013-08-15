@@ -86,8 +86,7 @@ objective <- function(p,dat) {
 
 # FULL DESIGN SIMULATION FUNCTION
 # nsim=1e1;p=start
-sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5),
-  dl=c("normal","deprived"),sl=c("left","right")) {
+sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5), dl=c("normal","deprived"),sl=c("left","right")) {
   parlists <- make.parlists(trans(p))
   nssd = length(ssds)
   if (length(stopp)==1) stopp <- rep(stopp,nssd)

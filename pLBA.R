@@ -60,10 +60,10 @@ rfun <- function(n,parlist,SSD=NA,stoprt=FALSE) {
   # pick winner and save in row1=winner index, row2=winner rt matrix  
   winner <- apply(rts,2,function(x){which.min(x)})
   out <- rbind(winner,rts[cbind(winner,1:n)])
-  gf <- as.logical(rbinom(dim(out)[2],1,parlist$pgf))
+  gf <- as.logical(rbinom(dim(out)[2],1,parlist$gf))
   out[,gf] <- NA
   if (!go) {
-    tf <- as.logical(rbinom(dim(out)[2],1,parlist$ptf))
+    tf <- as.logical(rbinom(dim(out)[2],1,parlist$tf))
     if (!stoprt) out[!tf & winner==1,2] <- NA
     out[1,] <- out[1,]-1    
   }

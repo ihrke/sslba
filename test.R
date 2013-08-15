@@ -13,7 +13,7 @@ source("pLBAmA.R")
 start=c(ster=.1,ter=.2,A=.2,Bs=.5,B=.8,Vs=2,V=1,v=0)
 sv=1; pgf=1e-6; ptf=1e-6
 
-start=astart
+start=start
 untrans(trans(start))
 untrans(lower)
 untrans(upper)
