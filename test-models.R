@@ -93,7 +93,7 @@ untrans(fit$par)-start
 dat <- sim.stop(n=1e3,p=start)
 
 # NLM should be fastest and often most accurate
-nlm.time <- system.time(fit.nlm <- fit.one(trans(start),dat,fn=objective)) # nlm by default
+nlm.time <- system.time(fit.nlm <- fit.one(trans(start),dat,fn=objective))[3] # nlm by default
 
 # Simplex is usually slower (when you multi-fit, 
 # if you dont multi-fit it is usually less accurate)
@@ -104,27 +104,58 @@ simplex.time.multi <- system.time(fit.simplex.multi <- fit.multi(trans(start),da
 
 
 # PSO and DE are very slow, set tracing to see if it is stuck!
-# Set back to trace=0 for PSO to not do this (there must be a similar option
-# in DE but I didnt set it)
+# Set back to trace=0 for PSO to not do this.
+
 # There are LOTS of options to play with for these algorithms, I havent used
 # much more thatn the defaults, for PSO "SPSO2011" can really slow things down
-# (and is really slow already) but can be better. There are at least 6 DE 
-# algorithms, again I have only tried the default
+# (and is really slow already) but can be better. In the defualt (SPSO2007) 
+# algorithm it is often a good idea to increase the number of particles
+# say to 40. There are at least 6 DE  algorithms, I have only tried the default
 
 # These use true values as start point
 pso.time.start <- system.time(fit.pso.start <- 
     fit.one(p=trans(start),dat=dat,fn=objective,type="pso",control=list(trace=1)))[3]
 
-################  UP TO HERE
+# HERE IS THE TRACE OUTPUT, IT DOESNT TERMINATE UNTIL maxit 
+# S=15, K=3, p=0.187, w0=0.7213, w1=0.7213, c.p=1.193, c.g=1.193
+# v.max=NA, d=21.52, vectorize=FALSE, hybrid=off
+# It 10: fitness=7492
+# ...
+# It 1000: fitness=7475
+# Maximal number of iterations reached
+
+fit.nlm$value-fit.pso.start$value # pso does a little better
+pso.time.start/ nlm.time # but took 22 times longer!
+
+# An advantage of DE and PSO is they dont need start values. In this case PSO needs
+
+# Do this run with only 20% of the number of iterations
+pso.time <- system.time(fit.pso <- 
+  fit.one(p=rep(NA,length(start)),dat,fn=objective,type="pso",control=list(trace=1,maxit=200)))[3]
+# Starts wasy worse but pretty quickly gets good 
+# S=15, K=3, p=0.187, w0=0.7213, w1=0.7213, c.p=1.193, c.g=1.193
+# v.max=NA, d=21.52, vectorize=FALSE, hybrid=off
+# It 10: fitness=9370
+# It 20: fitness=8253
+# It 30: fitness=7790
+# It 40: fitness=7617
+# It 50: fitness=7576
+# ...
+# It 200: fitness=7487
+# Maximal number of iterations reached
+
+# As it took a long time so I saved it and nlm (for comparision)
+save(dat,pso.time.start,fit.pso.start,
+         pso.time,fit.pso,nlm.time,fit.nlm,file="test.RData")
+
+
+##############  UP TO HERE
 
 # Note you could run de (but not pso) across multiple cores for a single fit, 
-# I have not done so 
+#  
 de.time.start <- system.time(fit.de.start <- 
     fit.one(trans(start),dat,fn=objective,type="de"))[3]
 
-# An advantage of DE and PSO is they dont need start values
-pso.time <- system.time(fit.pso <- 
-  fit.one(NA,dat,fn=objective,type="pso",control=list(trace=1)))[3]
 de.time <- system.time(fit.de <- fit.one(NA,dat,fn=objective,type="de"))[3]
 
 

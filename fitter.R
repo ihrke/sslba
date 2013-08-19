@@ -158,9 +158,7 @@ U_psoptimcl <- function (par, fn, gr = NULL, ..., lower=-1, upper=1,
     { 
         p.w1    <- p.w0[2]
         p.w0    <- p.w0[1]
-    } 
-    else 
-    {
+    } else {
         p.w1    <- p.w0
     }
     p.c.p         <- con[["c.p"]]            # local exploration constant
@@ -175,15 +173,12 @@ U_psoptimcl <- function (par, fn, gr = NULL, ..., lower=-1, upper=1,
     {
         p.hybrid <- pmatch(con[["hybrid"]],c("off","on","improved"))-1
         if (is.na(p.hybrid)) stop("hybrid should be one of \"off\", \"on\", \"improved\"")
-    }
-    else
-    {
+    } else{
         p.hybrid <- as.integer(as.logical(con[["hybrid"]])) # use local BFGS search
     }
     p.hcontrol    <- con[["hybrid.control"]]  # control parameters for hybrid optim
     if ("fnscale" %in% names(p.hcontrol))
-        p.hcontrol["fnscale"] <- p.hcontrol["fnscale"]*p.fnscale
-    else
+        p.hcontrol["fnscale"] <- p.hcontrol["fnscale"]*p.fnscale else
         p.hcontrol["fnscale"] <- p.fnscale
     p.trace.stats <- as.logical(con[["trace.stats"]]) # collect detailed stats?
   
@@ -240,9 +235,7 @@ U_psoptimcl <- function (par, fn, gr = NULL, ..., lower=-1, upper=1,
 #       for (z in 1:dim(X)[1]) {
 #         cat ("Parameter matrix:", X[z,], "\n")
 #       }
-    }
-    else
-    {
+    } else {
       # MG: Initialise with random parameters
       X <- mrunif(npar,p.s,lower,upper)          
     }
@@ -250,9 +243,7 @@ U_psoptimcl <- function (par, fn, gr = NULL, ..., lower=-1, upper=1,
     if (p.type==0) 
     {
         V <- (mrunif(npar,p.s,lower,upper)-X)/2
-    } 
-    else 
-    { 
+    } else { 
         ## p.type==1
         V <- matrix(runif(npar*p.s,min=as.vector(lower-X),max=as.vector(upper-X)),npar,p.s)
         p.c.p2 <- p.c.p/2 # precompute constants
@@ -590,6 +581,7 @@ psoptimcl <- cmpfun (U_psoptimcl)
 
 require("DEoptim")
 
+
 fit.one <- function(p,dat,fn,type="nlm",control=list()) {
   if (type=="de" & !any(is.na(p))) {
     if (is.null(control$NP)) 
@@ -649,4 +641,10 @@ fit.multi <- function(p,dat,fn,type="nlm",mind=.1,max.rep=100,control=list()) {
   fit$nrep <- rep
   fit$vals <- vals
   fit
+}
+
+
+# type="nlm";mind=0;max.rep=100;control=list(); fn=objective
+dat.fit <- function(dat,fn,type="nlm",mind=.1,max.rep=100,control=list()) {
+  fit.multi(trans(attr(dat,"p")),dat=dat,fn=fn,type=type,mind=mind,max.rep=max.rep,control=control)
 }
