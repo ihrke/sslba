@@ -46,20 +46,24 @@ dfun.2s <- function(t,pl,SSD) {
 # Sucessful stop 
 
 # pl=pls$D1S1s;SSD=j
+# pl=pl.bad; SSD=SSD.bad
 dfun.stop <- function(pl,SSD) {
-
+# upper=Inf can result in divergent integrals, default reasonable for seconds range
+  
   tmpf=function(t,pl,SSD) p1(z=pmax(t - pl$ter[1] - SSD,1e-5),A=pl$A[1],b=pl$b[1],v=pl$v[1],sv=pl$sv[1])* 
                           (1-c1(pmax(t - pl$ter[2],1e-5),A=pl$A[2],b=pl$b[2],v=pl$v[2],sv=pl$sv[2]))*
                           (1-c1(pmax(t - pl$ter[2],1e-5),A=pl$A[3],b=pl$b[3],v=pl$v[3],sv=pl$sv[3])) 
-  pstop=try(integrate(f=tmpf,lower=pl$ter[1]+SSD,upper=Inf,pl=pl,SSD=SSD)$value)
-  # debugging
+  pstop=try(integrate(f=tmpf,lower=pl$ter[1]+SSD,upper=Inf,pl=pl,SSD=SSD,
+                      stop.on.error=FALSE)$value)
+  # debugging, cant happen unless stop.on.error=TRUE
   if (class(pstop)=="try-error") {
     print(SSD)
     print(pl$ter[1]+SSD)
     print(pl)
-    lower.bad <<- pl$ter[1]+SSD; SSD.bad <<- SSD; pl.bad <<- pl 
+    SSD.bad <<- SSD; pl.bad <<- pl 
     stop()
   }
+  if (is.na(pstop)) pstop <- 0
   pmax(pmin(pstop,1),0) # protect from numerical errors
 }
 

@@ -27,8 +27,9 @@ rm(list=ls())
 source("fitter.R")
 source("pLBA.R")
 source("pLBAmA.R")
+
 start=c(ster=.1,ter=.2,A=.2,Bs=.5,B=.8,Vs=2,V=1,v=0)
-sv=1; pgf=0; ptf=0
+# sv=1; pgf=0; ptf=0
 
 # check you get back what you started with!
 untrans(trans(start)) 
@@ -74,7 +75,6 @@ round(tapply(edat$RT,list(stop=edat$SSD!=Inf,D=edat$D,S=edat$S),mean,na.rm=TRUE)
 objective(trans(start),dat)
 # what does likelihood look like against data
 View(cbind(dat,L=objective(trans(start),dat,lvals=TRUE)))
-
 # Does objective evaluate to a finite number at bounds (needed for pso and de)
 objective(lower,dat)
 objective(upper,dat)
@@ -87,21 +87,44 @@ untrans(fit$par)
 # How good is recovery?
 untrans(fit$par)-start
 
-# Check out performance of different fitters
+###### Check out performance of different fitters
+
+# Make some small data
 dat <- sim.stop(n=1e3,p=start)
+
+# NLM should be fastest and often most accurate
 nlm.time <- system.time(fit.nlm <- fit.one(trans(start),dat,fn=objective)) # nlm by default
+
+# Simplex is usually slower (when you multi-fit, 
+# if you dont multi-fit it is usually less accurate)
 simplex.time.one <- system.time(fit.simplex <- fit.one(trans(start),dat,fn=objective,type="simplex"))[3]
-# Try a multi-fit with simplex
+# Try a multi-fit with simplex, uses default of a < .1 decrease to stop
+# this defualt may need to be played with in real data!
 simplex.time.multi <- system.time(fit.simplex.multi <- fit.multi(trans(start),dat,fn=objective,type="simplex"))[3]
 
 
-#####################################  UP TO HERE
-###############  PROBLEMS WITH UPPER AND LOWER BOUNDS CAUSE ERROR IN DEoptim
+# PSO and DE are very slow, set tracing to see if it is stuck!
+# Set back to trace=0 for PSO to not do this (there must be a similar option
+# in DE but I didnt set it)
+# There are LOTS of options to play with for these algorithms, I havent used
+# much more thatn the defaults, for PSO "SPSO2011" can really slow things down
+# (and is really slow already) but can be better. There are at least 6 DE 
+# algorithms, again I have only tried the default
+
 # These use true values as start point
-pso.time.start <- system.time(fit.simplex <- fit.one(trans(start),dat,fn=objective,type="pso"))[3]
-de.time.start <- system.time(fit.simplex <- fit.one(trans(start),dat,fn=objective,type="de"))[3]
-# These dont use start values
-pso.time.nostart <- system.time(fit.simplex <- fit.one(NA,dat,fn=objective,type="pso"))[3]
-de.time.nostart <- system.time(fit.simplex <- fit.one(NA,dat,fn=objective,type="de"))[3]
+pso.time.start <- system.time(fit.pso.start <- 
+    fit.one(p=trans(start),dat=dat,fn=objective,type="pso",control=list(trace=1)))[3]
+
+################  UP TO HERE
+
+# Note you could run de (but not pso) across multiple cores for a single fit, 
+# I have not done so 
+de.time.start <- system.time(fit.de.start <- 
+    fit.one(trans(start),dat,fn=objective,type="de"))[3]
+
+# An advantage of DE and PSO is they dont need start values
+pso.time <- system.time(fit.pso <- 
+  fit.one(NA,dat,fn=objective,type="pso",control=list(trace=1)))[3]
+de.time <- system.time(fit.de <- fit.one(NA,dat,fn=objective,type="de"))[3]
 
 
