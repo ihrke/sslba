@@ -1,4 +1,3 @@
-require(DEoptim)
 # Parameters to psoptim
 #
 # MG: par   - vector: length defines number of dimensions of the problem
@@ -589,12 +588,12 @@ U_psoptimcl <- function (par, fn, gr = NULL, ..., lower=-1, upper=1,
 library(compiler)
 psoptimcl <- cmpfun (U_psoptimcl)
 
+require("DEoptim")
 
-fit.one <- function(p,dat,fn,type,control=list()) {
+fit.one <- function(p,dat,fn,type="nlm",control=list()) {
   if (type=="de" & !any(is.na(p))) {
     if (is.null(control$NP)) 
-      NP <- 10*length(lower) 
-    else
+      NP <- 10*length(lower) else
       NP <- control$NP
     control$initialpop <- matrix(ncol=length(lower),nrow=NP)
     if (!is.matrix(p)) {
@@ -634,7 +633,7 @@ fit.one <- function(p,dat,fn,type,control=list()) {
 # If mind<=0 fits only once
 
 # p=start;dat=data;type="simplex";fn=objective;mind=10;control=list(trace=100,maxit=5)
-fit.multi <- function(p,dat,type,fn,mind=.1,max.rep=100,control=list()) {
+fit.multi <- function(p,dat,fn,type="nlm",mind=.1,max.rep=100,control=list()) {
   fit <- fit.one(p,dat,fn,type,control)
   vals <- fit$value
   rep <- 1

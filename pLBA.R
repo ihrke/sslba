@@ -5,10 +5,6 @@ require(truncnorm,quietly=T)
 ############################  Postive LBA NODE FUNCTIONS
 
 # MAKE SURE PNORM DOESNT PRODUCE FUNNY RESULTS
-
-## NOTE(matthias): is it a good idea to set a hard numerical threshold (i.e., 7)?
-##  should maybe depend on mean/sd? E.g. crit=mean+7*sd ?
-
 pnormP  <- function(x,mean=0,sd=1,lower.tail=T){ifelse(abs(x)<7,pnorm(x,mean,sd,lower.tail),ifelse(x<0,0,1))}
 
 dnormP <- function(x,mean=0,sd=1,lower.tail=T){ifelse(abs(x)<7,dnorm(x,mean,sd),0)}
@@ -17,23 +13,28 @@ dnormP <- function(x,mean=0,sd=1,lower.tail=T){ifelse(abs(x)<7,dnorm(x,mean,sd),
 p1=function(z,A,b,v,sv) {
   # pdf for a single unit
   if (A<1e-10) # LATER solution 
-    return( pmax(0,((b/z^2)*dnormP(b/z,mean=v,sd=sv))/pnormP(v/sv)) ) # posdrifts
+    return(pmax(0,((b/z^2)*dnormP(b/z,mean=v,sd=sv))/
+                   pmax(pnormP(v/sv),1e-10))) # posdrifts
   zs=z*sv ; zu=z*v ; bminuszu=b-zu
   bzu=bminuszu/zs ; bzumax=(bminuszu-A)/zs
   pmax(0,((v*(pnormP(bzu)-pnormP(bzumax)) +
-             sv*(dnormP(bzumax)-dnormP(bzu)))/A)/pnormP(v/sv)) # posdrifts
+             sv*(dnormP(bzumax)-dnormP(bzu)))/A)/
+         pmax(pnormP(v/sv),1e-10)) # posdrifts
 }
 
+# z=pmax(t - pl$ter[2],1e-5);A=pl$A[2];b=pl$b[2];v=pl$v[2];sv=pl$sv[2]
 # Cumulative density for one unit
 c1=function(z,A,b,v,sv) {
   # cdf for a single unit
   if (A<1e-10) # LATER solution 
-    return( pmin(1,pmax(0,(pnormP(b/z,mean=v,sd=sv,lower.tail=F))/pnormP(v/sv))) ) # posdrifts
+    return( pmin(1,pmax(0,(pnormP(b/z,mean=v,sd=sv,lower.tail=F))/
+                          pmax(pnormP(v/sv),1e-10))) ) # posdrifts
   zs=z*sv ; zu=z*v ; bminuszu=b-zu ; xx=bminuszu-A
   bzu=bminuszu/zs ; bzumax=xx/zs
   tmp1=zs*(dnormP(bzumax)-dnormP(bzu))
   tmp2=xx*pnormP(bzumax)-bminuszu*pnormP(bzu)
-  pmin(pmax(0,(1+(tmp1+tmp2)/A)/pnormP(v/sv)),1) # posdrifts
+  pmin(pmax(0,(1+(tmp1+tmp2)/A)/
+              pmax(pnormP(v/sv),1e-10)),1) # posdrifts
 }
 
 
@@ -45,6 +46,8 @@ c1=function(z,A,b,v,sv) {
 # and given index 0, choice accumulators given index 1, 2... on all trials
 # For stop set SSD (one number or one per trial) to simulate SSD
 # stoprt: save stoprt (else set to NA)
+
+# SSD=NA; stoprt=FALSE
 rfun <- function(n,parlist,SSD=NA,stoprt=FALSE) {
   if (any(is.na(SSD))) { # go trial
     SSD <- 0
@@ -58,7 +61,7 @@ rfun <- function(n,parlist,SSD=NA,stoprt=FALSE) {
   nacc <- length(parlist$v)
   vs <- matrix(rtruncnorm(a=0,n=nacc*n,mean=parlist$v,sd=parlist$sv),nrow=nacc) 
   rts <- (parlist$b-runif(nacc*n,0,parlist$A))/vs # divide by v
-  if (!go) {
+  if ( !go ) {
     rts[1,] <- rts[1,]+parlist$ter[1]+SSD  # stop unit's ter + SSD
     rts[-1,] <- rts[-1,]+parlist$ter[2]  # go unit's ter
   } else rts <- rts+parlist$ter[1]  # go unit's ter
@@ -69,8 +72,7 @@ rfun <- function(n,parlist,SSD=NA,stoprt=FALSE) {
   out[,gf] <- NA
   if (!go) {
     tf <- as.logical(rbinom(dim(out)[2],1,parlist$tf))
-    
-    if (!stoprt) out[2, !tf & winner==1] <- NA
+    if (!stoprt) out[,!tf & winner==1] <- NA
     out[1,] <- out[1,]-1    
   }
   t(out)

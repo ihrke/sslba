@@ -11,12 +11,15 @@
 # GO(t)   : (1-pgf)*Lg(t)
 # STOP(t) : (1-pgf)*[ptf + (1-ptf)*Ls(t)]
 
-objective <- function(p,dat) {
+# p=trans(start)
+# p=pl.bad
+objective <- function(p,dat,lvals=FALSE) {
+  
   L <- numeric(dim(dat)[1])
-  pls <- make.parlists(untrans(p)) # think we have to untrans, since we get p from optimizer (?)
+  pls <- make.parlists(p)
   no.response <- is.na(dat$R)
   stop.trial <- is.finite(dat$SSD)
-  for (d in dl) for (s in sl) {
+  for (d in levels(dat$D)) for (s in levels(dat$S)) {
 
     # Go fail probability 
     pgf <- switch(d,
@@ -43,8 +46,7 @@ objective <- function(p,dat) {
         nstop[as.character(j)])    
     }
     
-    rl=levels(dat$R)
-    for (r in rl) { # GO(t) and STOP(t)
+    for (r in levels(dat$R)) { # GO(t) and STOP(t)
       
       # Go reponses
       is.in <- !stop.trial & !no.response & dat$D==d & dat$S==s & dat$R==r
@@ -78,13 +80,16 @@ objective <- function(p,dat) {
       }
     } # end of response loop      
   } # end of stimulus loop
-  -2*sum(log(pmax(L,1e-10)))
+  if (lvals) L else -2*sum(log(pmax(L,1e-10)))
 }
 
 
 # FULL DESIGN SIMULATION FUNCTION
-# nsim=1e1;p=start
-sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5), dl=c("normal","deprived"),sl=c("left","right")) {
+
+# nsim=1e2;p=start
+# stopp=.25;ssds=c(.1,.2,.3,.4,.5); dl=c("normal","deprived");sl=c("left","right")
+sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5),
+  dl=c("deprived","normal"),sl=c("left","right")) {
   parlists <- make.parlists(trans(p))
   nssd = length(ssds)
   if (length(stopp)==1) stopp <- rep(stopp/nssd,nssd)
@@ -92,6 +97,8 @@ sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5), dl=c("normal","dep
   ssdn <- round(sum(stopp)*nsim/nssd)
   nstop <- nssd*ssdn
   ngo <- nsim-(nstop)  
+  
+  # Go data
   dat.go <- cbind.data.frame(
     D=factor(rep(dl,each=ngo*2)),
     S=factor(rep(sl,each=ngo,times=2)),
@@ -103,9 +110,11 @@ sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5), dl=c("normal","dep
     )
   )
   names(dat.go)[4:5] <- c("R","RT")
-  dat.go$R <- factor(dat.go$R,labels=c("left","right"))
+  dat.go$R <- factor(dat.go$R,levels=1:2,labels=c("left","right"))
   dat.go$C <- dat.go$R==dat.go$S
   SSD <- rep(ssds,each=ssdn)
+  
+  # Stop data
   dat.stop <- cbind.data.frame(
     D=factor(rep(dl,each=nstop*2)),
     S=factor(rep(sl,each=nstop,times=2)),
@@ -117,12 +126,8 @@ sim.stop <- function(nsim,p,stopp=.25,ssds=c(.1,.2,.3,.4,.5), dl=c("normal","dep
     )
   )
   names(dat.stop)[4:5] <- c("R","RT")
-  dat.stop$R[dat.stop$R==0]=NA # winning stop process -> no response
-  dat.stop$R <- factor(dat.stop$R,labels=c("left","right"))
+  dat.stop$R <- factor(dat.stop$R,levels=1:2,labels=c("left","right"))
   dat.stop$C <- dat.stop$R==dat.stop$S 
   rbind(dat.go,dat.stop)[,c("D","S","SSD","R","C","RT")]
 }
-
-
-
 
