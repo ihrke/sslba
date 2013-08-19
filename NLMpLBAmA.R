@@ -21,5 +21,4 @@ sfExportAll()
 sfLibrary(truncnorm)
 fits <- sfLapply(datlist,dat.fit,fn=objective,type=type,mind=mind)
 sfStop()
-save(fits,file=paste(model.class,model.name,type,".RData",sep=""))
-       
+save(fits,file=paste(model.class,"m",model.name,type,".RData",sep=""))

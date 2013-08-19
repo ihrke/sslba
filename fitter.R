@@ -1,3 +1,4 @@
+require(DEoptim)
 # Parameters to psoptim
 #
 # MG: par   - vector: length defines number of dimensions of the problem
